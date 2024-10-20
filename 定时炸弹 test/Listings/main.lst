@@ -1,0 +1,277 @@
+C51 COMPILER V9.54   MAIN                                                                  10/13/2024 15:48:48 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\keil5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main.l
+                    -st) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "Nixie.h"
+   3          #include "Delay1ms.h"
+   4          #include "UART.h"
+   5          #include "led.h"
+   6          
+   7          sbit BEEP=P2^5; //½«P2.5¹Ü½Å¶¨ÒåÎªBEEP
+   8          int Tcounter,direct,dutyfactor,Tcount;
+   9          unsigned int num=15,num1,num2;
+  10          unsigned int password=5,usernum=0,password1,password2,password3;
+  11          int count;
+  12          int x,y,z;
+  13          int beepflat=0;
+  14          void Timer0_Init(void)          //1ºÁÃë@11.0592MHz
+  15          {
+  16   1              TMOD &= 0xF0;           //ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+  17   1              TMOD |= 0x01;           //ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+  18   1              TL0 = 0x66;             //ÉèÖÃ¶¨Ê±³õÖµ
+  19   1              TH0 = 0xFC;             //ÉèÖÃ¶¨Ê±³õÖµ
+  20   1              TF0 = 0;                //Çå³ýTF0±êÖ¾
+  21   1              TR0 = 1;                //¶¨Ê±Æ÷0¿ªÊ¼¼ÆÊ±
+  22   1              
+  23   1              ET0=1;  //ÉèÖÃÖÐ¶Ï
+  24   1              EA=1;
+  25   1      }
+  26          
+  27          //void Timer1_Init(void)                //1ºÁÃë@11.0592MHz
+  28          //{
+  29          //      TMOD &= 0x0F;           //ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+  30          //      TMOD |= 0x10;           //ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+  31          //      TL1 = 0x48;             //ÉèÖÃ¶¨Ê±³õÖµ
+  32          //      TH1 = 0xFF;             //ÉèÖÃ¶¨Ê±³õÖµ
+  33          //      TF1 = 0;                //Çå³ýTF1±êÖ¾
+  34          //      TR1 = 0;                //¶¨Ê±Æ÷1¿ªÊ¼¼ÆÊ±
+  35          //      
+  36          //      ET1=1;
+  37          //      EA=1;
+  38          //}
+  39          
+  40          void Timer2Init(void)           //50ºÁÃë@11.0592MHz
+  41          {
+  42   1              T2MOD = 0;              //³õÊ¼»¯Ä£Ê½¼Ä´æÆ÷
+  43   1              T2CON = 0;              //³õÊ¼»¯¿ØÖÆ¼Ä´æÆ÷
+  44   1              TL2 = 0x48;             //ÉèÖÃ¶¨Ê±³õÖµ
+  45   1              TH2 = 0xFF;             //ÉèÖÃ¶¨Ê±³õÖµ
+  46   1              RCAP2L = 0x48;          //ÉèÖÃ¶¨Ê±ÖØÔØÖµ
+  47   1              RCAP2H = 0xFF;          //ÉèÖÃ¶¨Ê±ÖØÔØÖµ
+  48   1              TR2 = 0;                //¶¨Ê±Æ÷2¿ªÊ¼¼ÆÊ±
+  49   1      
+  50   1              ET2=1;
+  51   1              EA=1;
+  52   1      }
+  53          
+  54          
+C51 COMPILER V9.54   MAIN                                                                  10/13/2024 15:48:48 PAGE 2   
+
+  55          
+  56          void breatheLED() 
+  57          {
+  58   1              if(Tcount >= 100) 
+  59   1              {                               //Ò»¸öPWMÖÜÆÚ(100´Î*200us)
+  60   2                      Tcount = 0;                                     //ÏÂÒ»¸öPWMÖÜÆÚÄÚ£¬ÖØÐÂ¼ÆÊý
+  61   2                      
+  62   2                      //¸ù¾Ý·½ÏòÅÐ¶ÏÕ¼¿Õ±ÈÔö¼Ó»ò¼õÉÙ
+  63   2                      if(direct == 0)
+  64   2                      {                       //Õý·½Ïò£¬Õ¼¿Õ±ÈÔö¼Ó
+  65   3                              dutyfactor++;                   //ÏÂÒ»¸öPWMÖÜÆÚ£¬Õ¼¿Õ±ÈÔö¼Ó1
+  66   3                      } else if(direct == 1){         //¸º·½Ïò£¬Õ¼¿Õ±È¼õÉÙ
+  67   3                              dutyfactor--;                   //ÏÂÒ»¸öPWMÖÜÆÚ£¬Õ¼¿Õ±È¼õÉÙ1
+  68   3                      }
+  69   2              }
+  70   1              
+  71   1              //¸ù¾ÝÕ¼¿Õ±ÈÖµÅÐ¶Ï·½ÏòÊÇ·ñÐèÒª¸Ä±ä
+  72   1              if(dutyfactor <= 0)
+  73   1              {                       //Õ¼¿Õ±È¼õÉÙµ½0
+  74   2                      direct = 0;                                     //Õý·½Ïò£¬Õ¼¿Õ±È¿ªÊ¼Ôö¼Ó
+  75   2              } else if(dutyfactor >= 100) {  //Õ¼¿Õ±ÈÔö¼Óµ½100
+  76   2                      direct = 1;                                     //¸º·½Ïò£¬Õ¼¿Õ±È¿ªÊ¼¼õÉÙ
+  77   2              }
+  78   1              
+  79   1              //Õ¼¿Õ±È£ºÍ¨µçÊ±¼äÏà¶ÔÓÚ×ÜÊ±¼äËùÕ¼µÄ±ÈÀý£¨´Ë³ÌÐòÖÐ£ºµÍµçÆ½Ê±¼äÏà¶ÔÓÚPWMÖÜÆÚËùÕ¼µÄ±ÈÀý£© 
+  80   1              //Ò»¸öPWMÖÜÆÚ¼ÆÊý100´Î£¬Õ¼¿Õ±ÈÏàµ±ÓÚµÍµçÆ½µÄ¼ÆÊýÖÜÆÚ´ÎÊý¡£¼´£º0~Õ¼¿Õ±È£ºµÍµçÆ½£¬µÆÁÁ£»Õ¼¿Õ±È~100£º¸ßµçÆ½£
+             -¬µÆÃð 
+  81   1              //ÔÚÒ»¸öPWMÖÜÆÚÄÚ£¬¸ù¾ÝÖÜÆÚ¼ÆÊýÊÇ·ñÐ¡ÓÚÕ¼¿Õ±È£¬ÅÐ¶ÏLEDµÆµÄÁÁÃð
+  82   1              if(Tcount < dutyfactor) 
+  83   1              {               //ÖÜÆÚ¼ÆÊýÖµ<Õ¼¿Õ±È
+  84   2                      P2_0 = 0;
+  85   2                      P2_6 = 0;
+  86   2                      P2_7 = 0;//µ±Ç°PWMÖÜÆÚµÄµ±Ç°¼ÆÊýÖÜÆÚÄÚµÆÁÁ
+  87   2              } else {
+  88   2                      P2_0 = 1;
+  89   2                      P2_6 = 1;
+  90   2                      P2_7 = 1;//µ±Ç°PWMÖÜÆÚµÄµ±Ç°¼ÆÊýÖÜÆÚÄÚµÆÃð
+  91   2              }
+  92   1      }
+  93          
+  94          //unsigned int num=15,num1,num2;
+  95          //unsigned int password=5,usernum=5,password1,password2,password3;
+  96          //int count;
+  97          //int x,y,z;
+  98          //int Tcounter,direct,dutyfactor;
+  99          void main()
+ 100          {       
+ 101   1              UartInit();
+ 102   1              Timer0_Init();
+ 103   1      //      Timer1_Init();
+ 104   1              Timer2Init();
+ 105   1      
+ 106   1              BEEP=0;
+ 107   1              while(1)
+ 108   1              {                       
+ 109   2                      Nixie(1,num1);
+ 110   2                      Nixie(2,num2);
+ 111   2                      Nixie(4,usernum);
+ 112   2      
+ 113   2                      if(P3_1==0)
+ 114   2                      {
+ 115   3                              if(x<=10)x++;
+C51 COMPILER V9.54   MAIN                                                                  10/13/2024 15:48:48 PAGE 3   
+
+ 116   3                      }else x=0;
+ 117   2                      if(x==10)P2_0=~P2_0;
+ 118   2                              if(P2_0==0)
+ 119   2                                      password1=1;
+ 120   2                              else
+ 121   2                                      password1=0;
+ 122   2                      
+ 123   2                      if(P3_0==0)
+ 124   2                      {
+ 125   3                              if(y<=10)y++;
+ 126   3                      }else y=0;
+ 127   2                      if(y==10)P2_6=~P2_6;
+ 128   2                              if(P2_6==0)
+ 129   2                                      password2=1;
+ 130   2                              else
+ 131   2                                      password2=0;
+ 132   2                      
+ 133   2                      if(P3_2==0)
+ 134   2                      {
+ 135   3                              if(z<=10)z++;
+ 136   3                      }else z=0;
+ 137   2                      if(z==10)P2_7=~P2_7;
+ 138   2                              if(P2_7==0)
+ 139   2                                      password3=1;
+ 140   2                              else
+ 141   2                                      password3=0;
+ 142   2                                      
+ 143   2                      if(num==0 && usernum!=password)
+ 144   2                      {
+ 145   3                              TR2=1;
+ 146   3      //                      TR1=1;
+ 147   3                              beepflat=1;
+ 148   3                      }
+ 149   2                      if(usernum==password)
+ 150   2                      {
+ 151   3                              
+ 152   3                              TR0=0;
+ 153   3                              TR2=1;
+ 154   3                              breatheLED();
+ 155   3                              Nixie(1,0);
+ 156   3                              Nixie(2,0);
+ 157   3      
+ 158   3                      }
+ 159   2                              
+ 160   2              }
+ 161   1      }
+ 162          
+ 163          unsigned int T0Counter,T1Counter,T2counter;
+ 164          void Timer0_Routine() interrupt 1
+ 165          {
+ 166   1              TL0 = 0x66;             //ÉèÖÃ¶¨Ê±³õÖµ
+ 167   1              TH0 = 0xFC;             //ÉèÖÃ¶¨Ê±³õÖµ
+ 168   1      //      Nixie(1,num1);
+ 169   1      //      Nixie(2,num2);
+ 170   1      //      Nixie(4,usernum);
+ 171   1              if(beepflat==1)
+ 172   1              {
+ 173   2                      BEEP=~BEEP;
+ 174   2              }
+ 175   1              T0Counter++;
+ 176   1              if(T0Counter>=1000)
+ 177   1              {
+C51 COMPILER V9.54   MAIN                                                                  10/13/2024 15:48:48 PAGE 4   
+
+ 178   2                      usernum=(password1*4)+(password2*2)+(password3*1);
+ 179   2                      UART_SendByte(usernum);
+ 180   2                      T0Counter=0;
+ 181   2                      if(num!=0)
+ 182   2                      {
+ 183   3                              num--;
+ 184   3                              num1=num/10;
+ 185   3                              num2=num%10;    
+ 186   3                              
+ 187   3                      }
+ 188   2      //              if(num==0)
+ 189   2      //              {
+ 190   2      //                      TR2=1;
+ 191   2      //                      TR1=1;
+ 192   2      //                      
+ 193   2      //              }               
+ 194   2              }
+ 195   1      }
+ 196          
+ 197          //void Timer1_Rountine(void) interrupt 3
+ 198          //{
+ 199          //      TL1 = 0x48;             //ÉèÖÃ¶¨Ê±³õÖµ
+ 200          //      TH1 = 0xFF;             //ÉèÖÃ¶¨Ê±³õÖµ
+ 201          
+ 202          //}     
+ 203          
+ 204          void UART_Routine(void) interrupt 4
+ 205          {
+ 206   1              if(RI==1)
+ 207   1              {
+ 208   2                      usernum = SBUF;
+ 209   2                      RI=0; //ÇåÁã
+ 210   2              }
+ 211   1      }
+ 212          
+ 213          void Timer2_Rountine(void) interrupt 5
+ 214          {
+ 215   1              TF2=0;
+ 216   1              EXF2=0;
+ 217   1              
+ 218   1              if(usernum != password)
+ 219   1              {
+ 220   2                      T2counter++;
+ 221   2                      if(T2counter>=500)
+ 222   2                      {
+ 223   3                              T2counter=0;
+ 224   3                              count++;
+ 225   3                              switch(count)
+ 226   3                              {
+ 227   4                                      case 1:P2_0=1;P2_6=1;P2_7=0;break;
+ 228   4                                      case 2:P2_0=1;P2_6=0;P2_7=1;break;
+ 229   4                                      case 3:P2_0=0;P2_6=1;P2_7=1;break;
+ 230   4                              }
+ 231   3                              if(count>=3)
+ 232   3                              {
+ 233   4                                      count=0;
+ 234   4                              }
+ 235   3                      }
+ 236   2              }
+ 237   1              if(usernum == password)
+ 238   1              {
+ 239   2      //              Tcounter++;
+C51 COMPILER V9.54   MAIN                                                                  10/13/2024 15:48:48 PAGE 5   
+
+ 240   2                      Tcount++;
+ 241   2      
+ 242   2              }
+ 243   1              
+ 244   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    778    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     40    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
