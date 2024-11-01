@@ -1,0 +1,124 @@
+C51 COMPILER V9.54   KEY                                                                   11/01/2024 16:08:21 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN .\Objects\key.obj
+COMPILER INVOKED BY: D:\keil5\C51\BIN\C51.EXE key.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\key.lst
+                    -) OBJECT(.\Objects\key.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          
+   3          #define key_input    P3_0    // 按键输入口
+   4          
+   5          #define N_key    0             //无键
+   6          #define S_key    1             //单键
+   7          #define D_key    2             //双键
+   8          #define L_key    3             //长键
+   9          
+  10          #define key_state_0 0
+  11          #define key_state_1 1
+  12          #define key_state_2 2   
+  13          #define key_state_3 3
+  14          
+  15          unsigned char key_driver(void)
+  16          {
+  17   1          static unsigned char key_state = key_state_0, key_time = 0;
+  18   1          unsigned char key_press, key_return = N_key;
+  19   1      
+  20   1          key_press = key_input;                  // 读按键I/O电平
+  21   1      
+  22   1          switch (key_state)
+  23   1          {
+  24   2            case key_state_0:                            // 按键初始态
+  25   2              if (!key_press) key_state = key_state_1;  //键被按下，状态转换到按键消抖和确认状态
+  26   2              break;
+  27   2            
+  28   2            case key_state_1:                      // 按键消抖与确认态
+  29   2              if (!key_press)
+  30   2              {
+  31   3                   key_time = 0;                   //  
+  32   3                   key_state = key_state_2;   // 按键仍然处于按下，消抖完成，状态转换到按下键时间 
+  33   3                                                                // 的计时状态，但返回的还是无键事件
+  34   3              }
+  35   2              else
+  36   2                   key_state = key_state_0;   // 按键已抬起，转换到按键初始态。此处完成和实现软件 
+  37   2                                                                // 消抖，其实按键的按下和释放都在此消抖的。
+  38   2              break;
+  39   2            
+  40   2            case key_state_2:
+  41   2              if(key_press)
+  42   2              {
+  43   3                   key_return = S_key;           // 此时按键释放，说明是产生一次短操作，回送S_key
+  44   3                   key_state = key_state_0;   // 转换到按键初始态
+  45   3              }
+  46   2              else if (++key_time >= 100)    // 继续按下，计时加10ms（10ms为本函数循环执行间隔）
+  47   2              {
+  48   3                   key_return = L_key;            // 按下时间>1000ms，此按键为长按操作，返回长键事件
+  49   3                   key_state = key_state_3;   // 转换到等待按键释放状态
+  50   3              }
+  51   2              break;
+  52   2      
+  53   2            case key_state_3:                 // 等待按键释放状态，此状态只返回无按键事件
+  54   2              if (key_press) key_state = key_state_0; //按键已释放，转换到按键初始态
+C51 COMPILER V9.54   KEY                                                                   11/01/2024 16:08:21 PAGE 2   
+
+  55   2              break;
+  56   2          }
+  57   1          return key_return;
+  58   1      }
+  59          
+  60          unsigned char key_read(void)
+  61          {
+  62   1          static unsigned char key_m = key_state_0, key_time_1 = 0;
+  63   1          unsigned char key_return = N_key,key_temp;
+  64   1           
+  65   1          key_temp = key_driver();
+  66   1           
+  67   1          switch(key_m)
+  68   1          {
+  69   2              case key_state_0:
+  70   2                  if (key_temp == S_key )
+  71   2                  {
+  72   3                       key_time_1 = 0; // 第1次单击，不返回，到下个状态判断后面是否出现双击
+  73   3                       key_m = key_state_1;
+  74   3                  }
+  75   2                  else
+  76   2                       key_return = key_temp;        // 对于无键、长键，返回原事件
+  77   2                  break;
+  78   2      
+  79   2              case key_state_1:
+  80   2                  if (key_temp == S_key)             // 又一次单击（间隔肯定<500ms）
+  81   2                  {
+  82   3                       key_return = D_key;           // 返回双击键事件，回初始状态
+  83   3                       key_m = key_state_0;
+  84   3                  }
+  85   2                  else                                
+  86   2                  {                         // 这里500ms内肯定读到的都是无键事件，因为 
+  87   3                                            // 长键>1000ms，在1s前低层返回的都是无键
+  88   3                       if(++key_time_1 >= 50)
+  89   3                       {
+  90   4                           key_return = S_key; //500ms内没有再次出现单键事件，返回上一次 
+  91   4                                               // 的单键事件
+  92   4                           key_m = key_state_0;   // 返回初始状态
+  93   4                       }
+  94   3                   }
+  95   2                   break;
+  96   2          }
+  97   1          return key_return;
+  98   1      } 
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    121    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
