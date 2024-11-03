@@ -16,7 +16,11 @@ unsigned char key_driver(void)
 {
     static unsigned char key_state = key_state_0, key_time = 0;
     unsigned char key_press, key_return = N_key;
-
+//	unsigned char key1,key0,key2;
+//	key1 = P3_1 ;
+//	key0 = P3_0;
+//	key2 = P3_2;
+//	key_press = key1 + key0+key2;
     key_press = key_input;                  // ¶Á°´¼üI/OµçÆ½
 
     switch (key_state)

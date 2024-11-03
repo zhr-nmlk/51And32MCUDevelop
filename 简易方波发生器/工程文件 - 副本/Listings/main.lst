@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  11/01/2024 17:29:17 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  11/03/2024 16:22:09 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -10,70 +10,195 @@ line level    source
 
    1          #include <REGX52.H>
    2          #include "key.h"
-   3          
-   4          #define MODE1 1
-   5          #define MODE2 2
-   6          #define MODE3 3
-   7          
-   8          unsigned char State=3;
-   9          unsigned char Key,time_ok;
-  10          void modeshift()
-  11          {
-  12   1              switch(State)
-  13   1              {
-  14   2                      case MODE1:P2_0=0;P2_1=1;P2_2=1;break;
-  15   2                      case MODE2:P2_0=1;P2_1=0;P2_2=1;break;
-  16   2                      case MODE3:P2_0=1;P2_1=1;P2_2=0;break;
-  17   2              }
-  18   1      }
-  19          void Timer0Init(void)           //10毫秒@11.0592MHz
-  20          {
-  21   1              TMOD &= 0xF0;           //设置定时器模式
-  22   1              TMOD |= 0x01;           //设置定时器模式
-  23   1              TL0 = 0x00;             //设置定时初值
-  24   1              TH0 = 0xDC;             //设置定时初值
-  25   1              TF0 = 0;                //清除TF0标志
-  26   1              TR0 = 1;                //定时器0开始计时
-  27   1              ET0 = 1;
-  28   1              EA=1;
-  29   1      }
-  30          
-  31          void main()
-  32          {
-  33   1              Timer0Init();
-  34   1              while(1)
-  35   1              {
-  36   2                      if(time_ok)
-  37   2                      {
-  38   3                              time_ok=0;
-  39   3                              Key=key_read();
-  40   3                              if(Key==1)
-  41   3                                      State=1;
-  42   3                              if(Key==2)
-  43   3                                      State=2;
-  44   3                              if(Key==3)
-  45   3                                      State=3;
-  46   3                      }
-  47   2                      modeshift();
-  48   2              }
-  49   1      }
-  50          
-  51          void Timer0_Routine() interrupt 1
-  52          {
-  53   1              TL0 = 0x00;             //设置定时初值
-  54   1              TH0 = 0xDC;             //设置定时初值
-C51 COMPILER V9.54   MAIN                                                                  11/01/2024 17:29:17 PAGE 2   
+   3          #include "Nixie.h"
+   4          
+   5          #define MODE1 1         //模式1，2，3
+   6          #define MODE2 2
+   7          #define MODE3 3
+   8          
+   9          #define S_key    1             //单键
+  10          #define D_key    2             //双键
+  11          #define L_key    3             //长键
+  12          
+  13          unsigned char State=1;
+  14          unsigned char Key,Key1,Key2,time_ok;
+  15          unsigned char Hz=10,dutyfactor=50;//初始化
+  16          unsigned char Key_Up_Count,Key_Down_Count,Tcount,dutyfactor_up,dutyfactor_down; 
+  17          unsigned int T;//定义周期
+  18          void bo() 
+  19          {
+  20   1              if(Tcount >= T) 
+  21   1              {                               //一个PWM周期
+  22   2                      Tcount = 0;                                     //下一个PWM周期内，重新计数
+  23   2                      
+  24   2              }  
+  25   1              //占空比：高电平时间占周期时间的比例
+  26   1      
+  27   1              //在一个PWM周期内，根据周期计数是否小于占空比
+  28   1              if(Tcount < (dutyfactor*T*0.01)) 
+  29   1              {               //周期计数值<占空比
+  30   2                      P2_7 = 1;
+  31   2              } else {
+  32   2                      P2_7 = 0;
+  33   2              }
+  34   1      }
+  35          
+  36          void modeshift()
+  37          {
+  38   1              switch(State)
+  39   1              {
+  40   2                      case MODE1:
+  41   2                                      bo();   //pwm产生方波
+  42   2                                      if(time_ok)             //模式切换
+  43   2                                      {
+  44   3                                              time_ok=0;
+  45   3                                              Key=key_read();
+  46   3                                              if(Key==S_key)
+  47   3                                                      State=1;
+  48   3                                              if(Key==D_key)
+  49   3                                                      State=2;
+  50   3                                              if(Key==L_key)
+  51   3                                                      State=3;
+  52   3                                      }
+  53   2                                      Nixie(3,Hz/10);Nixie(4,Hz%10);//显示频率
+  54   2                                      Nixie(5,dutyfactor/100);Nixie(6,dutyfactor%100/10);Nixie(7,dutyfactor%10);//显示占空比
+C51 COMPILER V9.54   MAIN                                                                  11/03/2024 16:22:09 PAGE 2   
 
-  55   1              time_ok=1;
-  56   1      }
+  55   2                                      break;
+  56   2                      case MODE2:
+  57   2                                      Nixie(4,1);
+  58   2                                      Nixie(5,Hz/10);
+  59   2                                      Nixie(6,Hz%10);
+  60   2                                      if(P3_1==0)
+  61   2                                      {
+  62   3                                              if(Key_Down_Count<=250)Key_Down_Count++;
+  63   3                                      }else Key_Down_Count=0;
+  64   2                                      if(Key_Down_Count==250)
+  65   2                                      {       
+  66   3                                              Key_Down_Count=0;
+  67   3                                              if(Hz>0)Hz--;
+  68   3                                      }
+  69   2                                      
+  70   2                                      if(P3_3==0)
+  71   2                                      {
+  72   3                                              if(Key_Up_Count<=250)Key_Up_Count++;
+  73   3                                      }else Key_Up_Count=0;
+  74   2                                      if(Key_Up_Count==250)
+  75   2                                      {       
+  76   3                                              Key_Up_Count=0;
+  77   3                                              if(Hz<50)Hz++;
+  78   3                                      }
+  79   2                                              if(time_ok)
+  80   2                                              {
+  81   3                                                      time_ok=0;
+  82   3                                                      Key=key_read();
+  83   3                                                      if(Key==S_key)
+  84   3                                                              State=1;
+  85   3                                              }
+  86   2      
+  87   2                                      T=10000/Hz;
+  88   2                                      break;
+  89   2                      case MODE3:
+  90   2                                      Nixie(4,2);
+  91   2                                      Nixie(5,dutyfactor/100);
+  92   2                                      Nixie(6,dutyfactor%100/10);
+  93   2                                      Nixie(7,dutyfactor%10);
+  94   2                                      if(P3_1==0)
+  95   2                                      {
+  96   3                                              if(dutyfactor_up<=250)dutyfactor_up++;
+  97   3                                      }else dutyfactor_up=0;
+  98   2                                      if(dutyfactor_up==250)
+  99   2                                      {       
+ 100   3                                              dutyfactor_up=0;
+ 101   3                                              if(dutyfactor>0)dutyfactor-=10;
+ 102   3                                      }
+ 103   2                                      
+ 104   2                                      if(P3_3==0)
+ 105   2                                      {
+ 106   3                                              if(dutyfactor_down<=250)dutyfactor_down++;
+ 107   3                                      }else dutyfactor_down=0;
+ 108   2                                      if(dutyfactor_down==250)
+ 109   2                                      {       
+ 110   3                                              dutyfactor_down=0;
+ 111   3                                              if(dutyfactor<100)dutyfactor+=10;
+ 112   3                                      }
+ 113   2                                      
+ 114   2                                      if(time_ok)
+ 115   2                                      {
+ 116   3                                              time_ok=0;
+C51 COMPILER V9.54   MAIN                                                                  11/03/2024 16:22:09 PAGE 3   
+
+ 117   3                                              Key=key_read();
+ 118   3                                              if(Key==S_key)
+ 119   3                                                      State=1;
+ 120   3                                      }
+ 121   2                                      break;
+ 122   2              }
+ 123   1      }
+ 124          void Timer0Init(void)           //10毫秒@11.0592MHz
+ 125          {
+ 126   1              TMOD &= 0xF0;           //设置定时器模式
+ 127   1              TMOD |= 0x01;           //设置定时器模式
+ 128   1              TL0 = 0x00;             //设置定时初值
+ 129   1              TH0 = 0xDC;             //设置定时初值
+ 130   1              TF0 = 0;                //清除TF0标志
+ 131   1              TR0 = 1;                //定时器0开始计时
+ 132   1              ET0 = 1;
+ 133   1              EA=1;
+ 134   1      }
+ 135          
+ 136          void Timer1Init(void)           //100微秒@11.0592MHz
+ 137          {
+ 138   1              TMOD &= 0x0F;           //设置定时器模式
+ 139   1              TL1 = 0xA4;             //设置定时初值
+ 140   1              TH1 = 0xFF;             //设置定时初值
+ 141   1              TF1 = 0;                //清除TF1标志
+ 142   1              TR1 = 1;                //定时器1开始计时
+ 143   1              ET1=1;
+ 144   1      }
+ 145          
+ 146          void main()
+ 147          {
+ 148   1              Timer0Init();
+ 149   1              Timer1Init();
+ 150   1              P2_5=0;
+ 151   1              while(1)
+ 152   1              {
+ 153   2                      modeshift();
+ 154   2              }
+ 155   1      }
+ 156          
+ 157          unsigned int T0Count,T1Count;
+ 158          void Timer0_Routine() interrupt 1
+ 159          {
+ 160   1              TL0 = 0x00;             //设置定时初值
+ 161   1              TH0 = 0xDC;             //设置定时初值
+ 162   1              time_ok=1;
+ 163   1              T0Count++;
+ 164   1              if(T0Count>=1000)
+ 165   1              {
+ 166   2                      T0Count=0;      
+ 167   2              }
+ 168   1      }
+ 169          
+ 170          void Timer1_Routine() interrupt 3
+ 171          {
+ 172   1              TL1 = 0xA4;             //设置定时初值
+ 173   1              TH1 = 0xFF;             //设置定时初值
+ 174   1      
+ 175   1              Tcount++;
+ 176   1      
+ 177   1      }
+
+C51 COMPILER V9.54   MAIN                                                                  11/03/2024 16:22:09 PAGE 4   
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    109    ----
+   CODE SIZE        =    625    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      3    ----
+   DATA SIZE        =     18    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
