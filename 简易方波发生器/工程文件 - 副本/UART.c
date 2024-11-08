@@ -56,6 +56,7 @@ void UART_SendString(unsigned char * str)
 		UART_SendByte(str[i]);
 		i++;
 	}
+	i=0;
 }
 
 unsigned char * UART_ReadData(void)

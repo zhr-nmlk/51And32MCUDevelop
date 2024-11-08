@@ -18,8 +18,8 @@ unsigned char Key,Key1,Key2,time_ok;
 unsigned char Hz=10,dutyfactor=50;//初始化
 unsigned char Key_Up_Count,Key_Down_Count,Tcount,dutyfactor_up,dutyfactor_down,time_count_read,RWflag=0;
 unsigned int T;//定义周期
-unsigned char * Hz_Duty;
-unsigned char Hz_Duty_Record[]="f=  ,d=   .";
+char * Hz_Duty;
+char Hz_Duty_Record[]="f=--,d=---.";
 void bo()
 {
 	if(Tcount >= T) 
@@ -92,18 +92,22 @@ void modeshift()
 					Key_Up_Count=0;
 					if(Hz<50)Hz++;
 				}
-					if(time_ok)
+				
+				if(time_ok)
+				{
+					time_ok=0;
+					Key=key_read();
+					if(Key==S_key)
 					{
-						time_ok=0;
-						Key=key_read();
-						if(Key==S_key)
-							State=1;
-							
+						UART_SendString(Hz_Duty_Record);
+						State=1;
+						
 					}
+				}
 				
 				T=1000/Hz;
-//				Hz_Duty[2]=Hz/10;
-//				Hz_Duty[3]=Hz%10;
+				Hz_Duty_Record[2]=Hz/10+48;
+				Hz_Duty_Record[3]=Hz%10+48;
 				break;
 		case MODE3:
 				Nixie(4,2);
@@ -163,17 +167,6 @@ void Timer1Init(void)		//10毫秒@11.0592MHz
 	ET1=1;
 }
 
-//void Timer2Init(void)		//100微秒@11.0592MHz
-//{
-//	T2MOD = 0;		//初始化模式寄存器
-//	T2CON = 0;		//初始化控制寄存器
-//	TL2 = 0xA4;		//设置定时初值
-//	TH2 = 0xFF;		//设置定时初值
-//	RCAP2L = 0xA4;		//设置定时重载值
-//	RCAP2H = 0xFF;		//设置定时重载值
-//	TR2 = 0;		//定时器2开始计时
-//	
-//}
 void Timer2Init(void)		//10毫秒@11.0592MHz
 {
 	T2MOD = 0;		//初始化模式寄存器
@@ -193,7 +186,7 @@ void main()
 	Timer0Init();
 	Timer1Init();
 	Timer2Init();
-//	UartInit();
+	UartInit();
 	while(1)
 	{
 		bo();
@@ -237,4 +230,6 @@ void Timer2_Rountine(void) interrupt 5//定时器2中断	10ms
 		}
 		if(Tflag>=2)
 			Tflag=0;	
+//		UART_SendString(Hz_Duty_Record);
+
 }
