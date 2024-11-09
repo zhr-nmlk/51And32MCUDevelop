@@ -1,0 +1,281 @@
+C51 COMPILER V9.54   MAIN                                                                  11/09/2024 21:29:06 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\keil5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main.l
+                    -st) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "key.h"
+   3          #include "Nixie.h"
+   4          #include "I2C.h"
+   5          #include "AT24C02.h"
+   6          #include "UART.h"
+   7          
+   8          #define MODE1 1         //模式1，2，3
+   9          #define MODE2 2
+  10          #define MODE3 3
+  11          
+  12          #define S_key    1             //单键
+  13          #define D_key    2             //双键
+  14          #define L_key    3             //长键
+  15          
+  16          unsigned char UART_flag=0,R_I=0;
+  17          unsigned char State=1;
+  18          unsigned char Key,Key1,Key2,time_ok;
+  19          unsigned char Hz=10,dutyfactor=50;//初始化
+  20          unsigned char Key_Up_Count,Key_Down_Count,Tcount,dutyfactor_up,dutyfactor_down,time_count_read,RWflag=0;
+  21          unsigned int T;//定义周期
+  22          unsigned char * Hz_Duty;
+  23          char Hz_Duty_Record[]="f=--,d=---.";
+  24          void bo()
+  25          {
+  26   1              if(Tcount >= T) 
+  27   1              {                               //一个PWM周期
+  28   2                      Tcount = 0;                                     //下一个PWM周期内，重新计数
+  29   2                      
+  30   2              }  
+  31   1              //占空比：高电平时间占周期时间的比例
+  32   1      
+  33   1              //在一个PWM周期内，根据周期计数是否小于占空比
+  34   1              if(Tcount <= (dutyfactor*T*0.01)) 
+  35   1              {               //周期计数值<占空比
+  36   2                      P2_7 = 1;
+  37   2              } else {
+  38   2                      P2_7 = 0;
+  39   2              }
+  40   1      }
+  41          
+  42          void modeshift()
+  43          {
+  44   1              switch(State)
+  45   1              {
+  46   2                      case MODE1:
+  47   2      //                              bo();   //pwm产生方波
+  48   2                                      if(time_ok)             //模式切换
+  49   2                                      {
+  50   3                                              time_ok=0;
+  51   3                                              Key=key_read();
+  52   3                                              if(Key==S_key)
+  53   3                                                      State=1;
+  54   3                                              if(Key==D_key)
+C51 COMPILER V9.54   MAIN                                                                  11/09/2024 21:29:06 PAGE 2   
+
+  55   3                                                      State=2;
+  56   3                                              if(Key==L_key)
+  57   3                                                      State=3;
+  58   3                                      }
+  59   2                                      if(P3_2==0)
+  60   2                                      {
+  61   3                                              if(time_count_read<=250) time_count_read++;
+  62   3                                      }else time_count_read=0;
+  63   2                                      if(time_count_read==250)
+  64   2                                      {
+  65   3                                              time_count_read=0;
+  66   3                                              Hz=AT24C02_ReadByte(0);
+  67   3                                              dutyfactor=AT24C02_ReadByte(1);
+  68   3                                      }
+  69   2                                      T=1000/Hz;
+  70   2                                      if(UART_flag==1)
+  71   2                                      {
+  72   3                                              Hz_Duty=UART_ReadData();
+  73   3      //                                      Hz=(Hz_Duty[2]-48)*10+Hz_Duty[3]-48;
+  74   3      //                                      dutyfactor=(Hz_Duty[7]-48)*100+(Hz_Duty[8]-48)*10+(Hz_Duty[9]-48);
+  75   3                                      }
+  76   2                                      
+  77   2                                      Nixie(3,Hz/10);Nixie(4,Hz%10);//显示频率
+  78   2                                      Nixie(5,dutyfactor/100);Nixie(6,dutyfactor%100/10);Nixie(7,dutyfactor%10);//显示占空比
+  79   2                                      break;
+  80   2                      case MODE2:
+  81   2                                      Nixie(4,1);
+  82   2                                      Nixie(5,Hz/10);
+  83   2                                      Nixie(6,Hz%10);
+  84   2                                      if(P3_1==0)
+  85   2                                      {
+  86   3                                              if(Key_Down_Count<=250)Key_Down_Count++;
+  87   3                                      }else Key_Down_Count=0;
+  88   2                                      if(Key_Down_Count==250)
+  89   2                                      {       
+  90   3                                              Key_Down_Count=0;
+  91   3                                              if(Hz>0)Hz--;
+  92   3                                      }
+  93   2                                      
+  94   2                                      if(P3_3==0)
+  95   2                                      {
+  96   3                                              if(Key_Up_Count<=250)Key_Up_Count++;
+  97   3                                      }else Key_Up_Count=0;
+  98   2                                      if(Key_Up_Count==250)
+  99   2                                      {       
+ 100   3                                              Key_Up_Count=0;
+ 101   3                                              if(Hz<50)Hz++;
+ 102   3                                      }
+ 103   2                                      
+ 104   2                                      if(time_ok)
+ 105   2                                      {
+ 106   3                                              time_ok=0;
+ 107   3                                              Key=key_read();
+ 108   3                                              if(Key==S_key)
+ 109   3                                              {
+ 110   4                                                      UART_SendString(Hz_Duty_Record);
+ 111   4                                                      State=1;
+ 112   4                                              }
+ 113   3                                      }
+ 114   2                                      
+ 115   2                                      T=1000/Hz;
+ 116   2                                      Hz_Duty_Record[2]=Hz/10+48;
+C51 COMPILER V9.54   MAIN                                                                  11/09/2024 21:29:06 PAGE 3   
+
+ 117   2                                      Hz_Duty_Record[3]=Hz%10+48;
+ 118   2                                      Hz_Duty_Record[7]=dutyfactor/100+48;
+ 119   2                                      Hz_Duty_Record[8]=dutyfactor%100/10+48;
+ 120   2                                      Hz_Duty_Record[9]=dutyfactor%10+48;
+ 121   2                                      break;
+ 122   2                      case MODE3:
+ 123   2                                      Nixie(4,2);
+ 124   2                                      Nixie(5,dutyfactor/100);
+ 125   2                                      Nixie(6,dutyfactor%100/10);
+ 126   2                                      Nixie(7,dutyfactor%10);
+ 127   2                                      if(P3_1==0)
+ 128   2                                      {
+ 129   3                                              if(dutyfactor_up<=250)dutyfactor_up++;
+ 130   3                                      }else dutyfactor_up=0;
+ 131   2                                      if(dutyfactor_up==250)
+ 132   2                                      {       
+ 133   3                                              dutyfactor_up=0;
+ 134   3                                              if(dutyfactor>0)dutyfactor-=10;
+ 135   3                                      }
+ 136   2                                      
+ 137   2                                      if(P3_3==0)
+ 138   2                                      {
+ 139   3                                              if(dutyfactor_down<=250)dutyfactor_down++;
+ 140   3                                      }else dutyfactor_down=0;
+ 141   2                                      if(dutyfactor_down==250)
+ 142   2                                      {       
+ 143   3                                              dutyfactor_down=0;
+ 144   3                                              if(dutyfactor<100)dutyfactor+=10;
+ 145   3                                      }
+ 146   2                                      
+ 147   2                                      if(time_ok)
+ 148   2                                      {
+ 149   3                                              time_ok=0;
+ 150   3                                              Key=key_read();
+ 151   3                                              if(Key==S_key)
+ 152   3                                                      State=1;
+ 153   3                                      }
+ 154   2                                      break;
+ 155   2              }
+ 156   1      }
+ 157          void Timer0Init(void)           //1毫秒@11.0592MHz
+ 158          {
+ 159   1              TMOD &= 0xF0;           //设置定时器模式
+ 160   1              TMOD |= 0x01;           //设置定时器模式
+ 161   1              TL0 = 0x66;             //设置定时初值
+ 162   1              TH0 = 0xFC;             //设置定时初值
+ 163   1              TF0 = 0;                //清除TF0标志
+ 164   1              TR0 = 1;                //定时器0开始计时
+ 165   1              ET0 = 1;
+ 166   1              EA=1;
+ 167   1      }
+ 168          
+ 169          //void Timer1Init(void)         //10毫秒@11.0592MHz
+ 170          //{
+ 171          //      TMOD &= 0x0F;           //设置定时器模式
+ 172          //      TMOD |= 0x10;           //设置定时器模式
+ 173          //      TL1 = 0x00;             //设置定时初值
+ 174          //      TH1 = 0xDC;             //设置定时初值
+ 175          //      TF1 = 0;                //清除TF1标志
+ 176          //      TR1 = 1;                //定时器1开始计时
+ 177          //      ET1=1;
+ 178          //}
+C51 COMPILER V9.54   MAIN                                                                  11/09/2024 21:29:06 PAGE 4   
+
+ 179          
+ 180          void Timer2Init(void)           //10毫秒@11.0592MHz
+ 181          {
+ 182   1              T2MOD = 0;              //初始化模式寄存器
+ 183   1              T2CON = 0;              //初始化控制寄存器
+ 184   1              TL2 = 0x00;             //设置定时初值
+ 185   1              TH2 = 0xDC;             //设置定时初值
+ 186   1              RCAP2L = 0x00;          //设置定时重载值
+ 187   1              RCAP2H = 0xDC;          //设置定时重载值
+ 188   1              TR2 = 1;                //定时器2开始计时
+ 189   1              ET2=1;
+ 190   1      }
+ 191          
+ 192          void main()
+ 193          {
+ 194   1              P2_5=0;
+ 195   1              Timer0Init();
+ 196   1      //      Timer1Init();
+ 197   1              Timer2Init();
+ 198   1              UartInit();
+ 199   1              while(1)
+ 200   1              {
+ 201   2                      bo();
+ 202   2                      modeshift();
+ 203   2              }
+ 204   1      }
+ 205          
+ 206          unsigned int T0Count,T1Count,Tflag,CaseCount,T2Count;
+ 207          void Timer0_Routine() interrupt 1               //定时器1中断 1ms
+ 208          {
+ 209   1              TL0 = 0x66;             //设置定时初值
+ 210   1              TH0 = 0xFC;             //设置定时初值
+ 211   1              Tcount++;
+ 212   1              T0Count++;
+ 213   1              if(T0Count>=10)
+ 214   1              {
+ 215   2                      T0Count=0;
+ 216   2                      time_ok=1;
+ 217   2              }
+ 218   1      }
+ 219          
+ 220          void Timer2_Rountine(void) interrupt 5//定时器2中断     10ms
+ 221          {
+ 222   1              TF2=0;
+ 223   1              Tflag++;
+ 224   1                      switch(Tflag)
+ 225   1                      {
+ 226   2                              case 1:
+ 227   2                                      if(Hz!=10)
+ 228   2                                              AT24C02_WriteByte(0,Hz);  //写hz，10ms后写dutyfactor
+ 229   2                                      break;
+ 230   2                              case 2:if(dutyfactor!=50)
+ 231   2                                              AT24C02_WriteByte(1,dutyfactor);
+ 232   2                                      break;
+ 233   2                      }
+ 234   1                      if(Tflag>=2)
+ 235   1                              Tflag=0;        
+ 236   1              
+ 237   1              if(UART_flag==1)
+ 238   1              {
+ 239   2                      T2Count++;
+ 240   2                      if(T2Count>=100)
+C51 COMPILER V9.54   MAIN                                                                  11/09/2024 21:29:06 PAGE 5   
+
+ 241   2                      {
+ 242   3                              T2Count=0;
+ 243   3                              R_I=0;
+ 244   3                              Hz=(Hz_Duty[2]-48)*10+Hz_Duty[3]-48;
+ 245   3                              dutyfactor=(Hz_Duty[7]-48)*100+(Hz_Duty[8]-48)*10+(Hz_Duty[9]-48);
+ 246   3                              UART_flag=0;
+ 247   3                      }
+ 248   2              }
+ 249   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    992    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     43    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
