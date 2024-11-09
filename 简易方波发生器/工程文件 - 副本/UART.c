@@ -1,8 +1,10 @@
 #include <REGX52.H>
 #include "UART.h"
 
+extern unsigned char UART_flag,R_I;
+
 unsigned char StrBuf[20];
-unsigned char R_I;
+
 //unsigned char cnt;
 void UartInit(void)		//4800bps@11.0592MHz
 {
@@ -73,6 +75,7 @@ void UART_Routine () interrupt 4
 //		TL0 = 0x1A;		//设置定时初值
 //		TH0 = 0x1A;		//设置定时重载值
 		StrBuf[R_I++]=SBUF;
+		UART_flag=1;
 		RI=0;
 	}
 	

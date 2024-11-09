@@ -13,12 +13,13 @@
 #define D_key    2             //双键
 #define L_key    3             //长键
 
+unsigned char UART_flag=0,R_I=0;
 unsigned char State=1;
 unsigned char Key,Key1,Key2,time_ok;
 unsigned char Hz=10,dutyfactor=50;//初始化
 unsigned char Key_Up_Count,Key_Down_Count,Tcount,dutyfactor_up,dutyfactor_down,time_count_read,RWflag=0;
 unsigned int T;//定义周期
-char * Hz_Duty;
+unsigned char * Hz_Duty;
 char Hz_Duty_Record[]="f=--,d=---.";
 void bo()
 {
@@ -66,6 +67,13 @@ void modeshift()
 					dutyfactor=AT24C02_ReadByte(1);
 				}
 				T=1000/Hz;
+				if(UART_flag==1)
+				{
+					Hz_Duty=UART_ReadData();
+//					Hz=(Hz_Duty[2]-48)*10+Hz_Duty[3]-48;
+//					dutyfactor=(Hz_Duty[7]-48)*100+(Hz_Duty[8]-48)*10+(Hz_Duty[9]-48);
+				}
+				
 				Nixie(3,Hz/10);Nixie(4,Hz%10);//显示频率
 				Nixie(5,dutyfactor/100);Nixie(6,dutyfactor%100/10);Nixie(7,dutyfactor%10);//显示占空比
 				break;
@@ -101,13 +109,15 @@ void modeshift()
 					{
 						UART_SendString(Hz_Duty_Record);
 						State=1;
-						
 					}
 				}
 				
 				T=1000/Hz;
 				Hz_Duty_Record[2]=Hz/10+48;
 				Hz_Duty_Record[3]=Hz%10+48;
+				Hz_Duty_Record[7]=dutyfactor/100+48;
+				Hz_Duty_Record[8]=dutyfactor%100/10+48;
+				Hz_Duty_Record[9]=dutyfactor%10+48;
 				break;
 		case MODE3:
 				Nixie(4,2);
@@ -156,16 +166,16 @@ void Timer0Init(void)		//1毫秒@11.0592MHz
 	EA=1;
 }
 
-void Timer1Init(void)		//10毫秒@11.0592MHz
-{
-	TMOD &= 0x0F;		//设置定时器模式
-	TMOD |= 0x10;		//设置定时器模式
-	TL1 = 0x00;		//设置定时初值
-	TH1 = 0xDC;		//设置定时初值
-	TF1 = 0;		//清除TF1标志
-	TR1 = 1;		//定时器1开始计时
-	ET1=1;
-}
+//void Timer1Init(void)		//10毫秒@11.0592MHz
+//{
+//	TMOD &= 0x0F;		//设置定时器模式
+//	TMOD |= 0x10;		//设置定时器模式
+//	TL1 = 0x00;		//设置定时初值
+//	TH1 = 0xDC;		//设置定时初值
+//	TF1 = 0;		//清除TF1标志
+//	TR1 = 1;		//定时器1开始计时
+//	ET1=1;
+//}
 
 void Timer2Init(void)		//10毫秒@11.0592MHz
 {
@@ -179,12 +189,11 @@ void Timer2Init(void)		//10毫秒@11.0592MHz
 	ET2=1;
 }
 
-
 void main()
 {
 	P2_5=0;
 	Timer0Init();
-	Timer1Init();
+//	Timer1Init();
 	Timer2Init();
 	UartInit();
 	while(1)
@@ -194,7 +203,7 @@ void main()
 	}
 }
 
-unsigned int T0Count,T1Count,Tflag,CaseCount;
+unsigned int T0Count,T1Count,Tflag,CaseCount,T2Count;
 void Timer0_Routine() interrupt 1		//定时器1中断 1ms
 {
 	TL0 = 0x66;		//设置定时初值
@@ -207,12 +216,6 @@ void Timer0_Routine() interrupt 1		//定时器1中断 1ms
 		time_ok=1;
 	}
 }
-
-//void Timer1_Rountine(void) interrupt 3//定时器1中断	10ms
-//{
-//	TL1 = 0x00;		//设置定时初值
-//	TH1 = 0xDC;		//设置定时初值
-//}
 
 void Timer2_Rountine(void) interrupt 5//定时器2中断	10ms
 {
@@ -230,6 +233,17 @@ void Timer2_Rountine(void) interrupt 5//定时器2中断	10ms
 		}
 		if(Tflag>=2)
 			Tflag=0;	
-//		UART_SendString(Hz_Duty_Record);
-
+	
+	if(UART_flag==1)
+	{
+		T2Count++;
+		if(T2Count>=100)
+		{
+			T2Count=0;
+			R_I=0;
+			Hz=(Hz_Duty[2]-48)*10+Hz_Duty[3]-48;
+			dutyfactor=(Hz_Duty[7]-48)*100+(Hz_Duty[8]-48)*10+(Hz_Duty[9]-48);
+			UART_flag=0;
+		}
+	}
 }
