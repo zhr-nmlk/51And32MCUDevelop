@@ -21,7 +21,7 @@ unsigned char Key_Up_Count,Key_Down_Count,Tcount,dutyfactor_up,dutyfactor_down,t
 unsigned int T;//定义周期
 unsigned char * Hz_Duty;
 char Hz_Duty_Record[]="f=--,d=---.";
-void bo()
+void squarewave1()
 {
 	if(Tcount >= T) 
 	{				//一个PWM周期
@@ -39,12 +39,28 @@ void bo()
 	}
 }
 
+void squarewave2()
+{
+	if(Tcount >= T) 
+	{				//一个PWM周期
+		Tcount = 0;					//下一个PWM周期内，重新计数
+		
+	}  
+	//占空比：高电平时间占周期时间的比例
+
+	//在一个PWM周期内，根据周期计数是否小于占空比
+	if( (Tcount <= (dutyfactor*T*0.01) + (T/5*1.0) ) && ( Tcount >= (T/5*1.0) )  ) 
+	{		//周期计数值<占空比
+		P2_6 = 1;
+	} else {
+		P2_6 = 0;
+	}
+}
 void modeshift()
 {
 	switch(State)
 	{
 		case MODE1:
-//				bo();	//pwm产生方波
 				if(time_ok)		//模式切换
 				{
 					time_ok=0;
@@ -204,7 +220,8 @@ void main()
 	UartInit();
 	while(1)
 	{
-		bo();
+		squarewave1();
+		squarewave2();
 		modeshift();
 	}
 }
