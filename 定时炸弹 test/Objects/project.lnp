@@ -1,7 +1,0 @@
-".\Objects\main.obj",
-".\Objects\Nixie.obj",
-".\Objects\Delay1ms.obj",
-".\Objects\UART.obj",
-".\Objects\led.obj" 
-TO ".\Objects\project" 
-PRINT(".\Listings\project.m51") RAMSIZE(256) 
