@@ -1,0 +1,497 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        11/15/2024  23:13:16  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+D:\KEIL5\C51\BIN\BL51.EXE .\Objects\main.obj, .\Objects\UART.obj, .\Objects\Nixie.obj, .\Objects\Delay1ms.obj TO .\Objec
+>> ts\project PRINT (.\Listings\project.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL WITH FLOATING POINT ARITHMETIC
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  .\Objects\UART.obj (UART)
+  .\Objects\Nixie.obj (NIXIE)
+  .\Objects\Delay1ms.obj (DELAY1MS)
+  D:\KEIL5\C51\LIB\C51FPS.LIB (?C?FPADD)
+  D:\KEIL5\C51\LIB\C51FPS.LIB (?C?FPMUL)
+  D:\KEIL5\C51\LIB\C51FPS.LIB (?C?FPCMP)
+  D:\KEIL5\C51\LIB\C51FPS.LIB (?C?FCAST)
+  D:\KEIL5\C51\LIB\C51FPS.LIB (?C?FPGETOPN)
+  D:\KEIL5\C51\LIB\C51S.LIB (?C_STARTUP)
+  D:\KEIL5\C51\LIB\C51S.LIB (?C?CLDOPTR)
+  D:\KEIL5\C51\LIB\C51S.LIB (?C?IMUL)
+  D:\KEIL5\C51\LIB\C51S.LIB (?C?UIDIV)
+  D:\KEIL5\C51\LIB\C51S.LIB (?C?LNEG)
+  D:\KEIL5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\Objects\project (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0018H     UNIT         ?DT?MAIN
+            DATA    0020H     0015H     UNIT         ?DT?NIXIE
+            DATA    0035H     0014H     UNIT         ?DT?UART
+            DATA    0049H     0004H     UNIT         ?DT?_UART_SENDSTRING?UART
+            IDATA   004DH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0008H     UNIT         ?PR?_UART_SENDBYTE?UART
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     0015H     UNIT         ?PR?TIMER0INIT?MAIN
+            CODE    0023H     0003H     ABSOLUTE     
+            CODE    0026H     0005H     UNIT         ?PR?DELAY100US?DELAY1MS
+            CODE    002BH     0003H     ABSOLUTE     
+            CODE    002EH     03A1H     UNIT         ?C?LIB_CODE
+            CODE    03CFH     00F2H     UNIT         ?PR?SQUAREWAVE2?MAIN
+            CODE    04C1H     00A9H     UNIT         ?PR?TIMER2_ROUNTINE?MAIN
+            CODE    056AH     008CH     UNIT         ?C_C51STARTUP
+            CODE    05F6H     0066H     UNIT         ?PR?_NIXIE_SCAN?NIXIE
+            CODE    065CH     005BH     UNIT         ?PR?SQUAREWAVE1?MAIN
+            CODE    06B7H     0033H     UNIT         ?C_INITSEG
+            CODE    06EAH     0026H     UNIT         ?PR?UART_ROUTINE?UART
+            CODE    0710H     0023H     UNIT         ?PR?_UART_SENDSTRING?UART
+            CODE    0733H     001FH     UNIT         ?PR?MAIN?MAIN
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/15/2024  23:13:16  PAGE 2
+
+
+            CODE    0752H     001BH     UNIT         ?PR?UARTINIT?UART
+            CODE    076DH     001BH     UNIT         ?PR?NIXIE_LOOP?NIXIE
+            CODE    0788H     0014H     UNIT         ?PR?TIMER2INIT?MAIN
+            CODE    079CH     0014H     UNIT         ?PR?_DELAY1MS?DELAY1MS
+            CODE    07B0H     0013H     UNIT         ?PR?TIMER0_ROUTINE?MAIN
+            CODE    07C3H     0009H     UNIT         ?PR?_NIXIE_SETBUF?NIXIE
+            CODE    07CCH     0007H     UNIT         ?PR?UART_READDATA?UART
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\project (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN
+  +--> ?PR?TIMER0INIT?MAIN
+  +--> ?PR?TIMER2INIT?MAIN
+  +--> ?PR?UARTINIT?UART
+  +--> ?PR?SQUAREWAVE1?MAIN
+  +--> ?PR?SQUAREWAVE2?MAIN
+  +--> ?PR?UART_READDATA?UART
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\project (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:07B0H         PUBLIC        Timer0_Routine
+  D:0008H         PUBLIC        Tcount
+  B:00A8H.7       PUBLIC        EA
+  D:000AH         PUBLIC        T0Count
+  D:000BH         PUBLIC        T2Count
+  B:00A0H.6       PUBLIC        P2_6
+  B:00A0H.7       PUBLIC        P2_7
+  D:00CBH         PUBLIC        RCAP2H
+  D:00CAH         PUBLIC        RCAP2L
+  C:0733H         PUBLIC        main
+  D:0089H         PUBLIC        TMOD
+  D:000CH         PUBLIC        Phase_Record
+  D:0016H         PUBLIC        UART_flag
+  B:00A8H.1       PUBLIC        ET0
+  B:0088H.5       PUBLIC        TF0
+  C:000EH         PUBLIC        Timer0Init
+  B:00A8H.5       PUBLIC        ET2
+  D:0017H         PUBLIC        dutyfactor
+  B:00C8H.7       PUBLIC        TF2
+  D:008CH         PUBLIC        TH0
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/15/2024  23:13:16  PAGE 3
+
+
+  C:0788H         PUBLIC        Timer2Init
+  D:00CDH         PUBLIC        TH2
+  D:008AH         PUBLIC        TL0
+  D:0018H         PUBLIC        Phase_Read
+  D:00CCH         PUBLIC        TL2
+  D:001BH         PUBLIC        T
+  B:0088H.4       PUBLIC        TR0
+  B:00C8H.2       PUBLIC        TR2
+  D:00C9H         PUBLIC        T2MOD
+  D:00C8H         PUBLIC        T2CON
+  C:04C1H         PUBLIC        Timer2_Rountine
+  D:001DH         PUBLIC        Phase
+  D:001FH         PUBLIC        R_I
+  C:065CH         PUBLIC        squarewave1
+  C:03CFH         PUBLIC        squarewave2
+  -------         PROC          TIMER0INIT
+  C:000EH         LINE#         14
+  C:000EH         LINE#         15
+  C:000EH         LINE#         16
+  C:0011H         LINE#         17
+  C:0014H         LINE#         18
+  C:0017H         LINE#         19
+  C:001AH         LINE#         20
+  C:001CH         LINE#         21
+  C:001EH         LINE#         22
+  C:0020H         LINE#         23
+  C:0022H         LINE#         24
+  -------         ENDPROC       TIMER0INIT
+  -------         PROC          TIMER2INIT
+  C:0788H         LINE#         26
+  C:0788H         LINE#         27
+  C:0788H         LINE#         28
+  C:078BH         LINE#         29
+  C:078DH         LINE#         30
+  C:078FH         LINE#         31
+  C:0792H         LINE#         32
+  C:0794H         LINE#         33
+  C:0797H         LINE#         34
+  C:0799H         LINE#         35
+  C:079BH         LINE#         36
+  -------         ENDPROC       TIMER2INIT
+  -------         PROC          SQUAREWAVE1
+  C:065CH         LINE#         38
+  C:065CH         LINE#         39
+  C:065CH         LINE#         40
+  C:0667H         LINE#         41
+  C:0667H         LINE#         42
+  C:066CH         LINE#         44
+  C:066CH         LINE#         48
+  C:06B1H         LINE#         49
+  C:06B1H         LINE#         50
+  C:06B3H         LINE#         51
+  C:06B4H         LINE#         53
+  C:06B4H         LINE#         54
+  C:06B6H         LINE#         55
+  C:06B6H         LINE#         56
+  -------         ENDPROC       SQUAREWAVE1
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/15/2024  23:13:16  PAGE 4
+
+
+  -------         PROC          SQUAREWAVE2
+  C:03CFH         LINE#         58
+  C:03CFH         LINE#         59
+  C:03CFH         LINE#         60
+  C:03DAH         LINE#         61
+  C:03DAH         LINE#         62
+  C:03DFH         LINE#         64
+  C:03DFH         LINE#         68
+  C:04BBH         LINE#         69
+  C:04BBH         LINE#         70
+  C:04BDH         LINE#         71
+  C:04BEH         LINE#         73
+  C:04BEH         LINE#         74
+  C:04C0H         LINE#         75
+  C:04C0H         LINE#         77
+  -------         ENDPROC       SQUAREWAVE2
+  -------         PROC          MAIN
+  C:0733H         LINE#         79
+  C:0733H         LINE#         80
+  C:0733H         LINE#         81
+  C:0736H         LINE#         82
+  C:0739H         LINE#         83
+  C:073CH         LINE#         84
+  C:073CH         LINE#         85
+  C:073CH         LINE#         86
+  C:073FH         LINE#         87
+  C:0742H         LINE#         88
+  C:0747H         LINE#         89
+  C:0747H         LINE#         90
+  C:0750H         LINE#         91
+  C:0750H         LINE#         95
+  -------         ENDPROC       MAIN
+  -------         PROC          TIMER0_ROUTINE
+  C:07B0H         LINE#         100
+  C:07B2H         LINE#         102
+  C:07B5H         LINE#         103
+  C:07B8H         LINE#         104
+  C:07C0H         LINE#         111
+  -------         ENDPROC       TIMER0_ROUTINE
+  -------         PROC          TIMER2_ROUNTINE
+  C:04C1H         LINE#         112
+  C:04DEH         LINE#         114
+  C:04E0H         LINE#         115
+  C:04E6H         LINE#         116
+  C:04E6H         LINE#         117
+  C:04E8H         LINE#         118
+  C:04EFH         LINE#         119
+  C:04EFH         LINE#         120
+  C:04F2H         LINE#         122
+  C:04F8H         LINE#         123
+  C:04F8H         LINE#         124
+  C:04FBH         LINE#         126
+  C:0547H         LINE#         130
+  C:0549H         LINE#         131
+  C:054CH         LINE#         132
+  C:054CH         LINE#         133
+  C:054FH         LINE#         134
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/15/2024  23:13:16  PAGE 5
+
+
+  C:054FH         LINE#         135
+  C:054FH         LINE#         136
+  -------         ENDPROC       TIMER2_ROUNTINE
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        UART
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  B:00A8H.7       PUBLIC        EA
+  C:06EAH         PUBLIC        UART_Routine
+  B:00A8H.4       PUBLIC        ES
+  C:07CCH         PUBLIC        UART_ReadData
+  B:0098H.0       PUBLIC        RI
+  B:0098H.1       PUBLIC        TI
+  C:0710H         PUBLIC        _UART_SendString
+  D:0099H         PUBLIC        SBUF
+  D:0087H         PUBLIC        PCON
+  D:0098H         PUBLIC        SCON
+  C:0752H         PUBLIC        UartInit
+  D:0089H         PUBLIC        TMOD
+  C:0003H         PUBLIC        _UART_SendByte
+  B:00A8H.3       PUBLIC        ET1
+  D:008DH         PUBLIC        TH1
+  D:008BH         PUBLIC        TL1
+  B:0088H.6       PUBLIC        TR1
+  D:0035H         PUBLIC        StrBuf
+  -------         PROC          UARTINIT
+  C:0752H         LINE#         9
+  C:0752H         LINE#         10
+  C:0752H         LINE#         12
+  C:0755H         LINE#         13
+  C:0758H         LINE#         14
+  C:075BH         LINE#         15
+  C:075EH         LINE#         16
+  C:0761H         LINE#         17
+  C:0764H         LINE#         18
+  C:0766H         LINE#         19
+  C:0768H         LINE#         20
+  C:076AH         LINE#         21
+  C:076CH         LINE#         22
+  -------         ENDPROC       UARTINIT
+  -------         PROC          _UART_SENDBYTE
+  D:0007H         SYMBOL        Byte
+  C:0003H         LINE#         46
+  C:0003H         LINE#         47
+  C:0003H         LINE#         48
+  C:0005H         LINE#         49
+  C:0008H         LINE#         50
+  C:000AH         LINE#         51
+  -------         ENDPROC       _UART_SENDBYTE
+  -------         PROC          _UART_SENDSTRING
+  D:0049H         SYMBOL        str
+  -------         DO            
+  D:004CH         SYMBOL        i
+  -------         ENDDO         
+  C:0710H         LINE#         53
+  C:0716H         LINE#         54
+  C:0716H         LINE#         56
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/15/2024  23:13:16  PAGE 6
+
+
+  C:0728H         LINE#         57
+  C:0728H         LINE#         58
+  C:072BH         LINE#         59
+  C:072DH         LINE#         60
+  C:072FH         LINE#         61
+  C:0732H         LINE#         62
+  -------         ENDPROC       _UART_SENDSTRING
+  -------         PROC          UART_READDATA
+  C:07CCH         LINE#         64
+  C:07CCH         LINE#         65
+  C:07CCH         LINE#         66
+  C:07D2H         LINE#         67
+  -------         ENDPROC       UART_READDATA
+  -------         PROC          UART_ROUTINE
+  C:06EAH         LINE#         69
+  C:06F5H         LINE#         71
+  C:06F8H         LINE#         72
+  C:06F8H         LINE#         77
+  C:0702H         LINE#         78
+  C:0705H         LINE#         79
+  C:0707H         LINE#         80
+  C:0707H         LINE#         82
+  -------         ENDPROC       UART_ROUTINE
+  -------         ENDMOD        UART
+
+  -------         MODULE        NIXIE
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0021H         PUBLIC        Nixie_Buf
+  D:0080H         PUBLIC        P0
+  B:00A0H.2       PUBLIC        P2_2
+  B:00A0H.3       PUBLIC        P2_3
+  B:00A0H.4       PUBLIC        P2_4
+  C:07C3H         PUBLIC        _Nixie_SetBuf
+  C:05F6H         PUBLIC        _Nixie_Scan
+  D:002AH         PUBLIC        NixieTable
+  C:076DH         PUBLIC        Nixie_Loop
+  -------         PROC          _NIXIE_SETBUF
+  D:0007H         SYMBOL        Location
+  D:0004H         SYMBOL        Number
+  C:07C3H         LINE#         8
+  C:07C3H         LINE#         9
+  C:07C3H         LINE#         10
+  C:07CBH         LINE#         11
+  -------         ENDPROC       _NIXIE_SETBUF
+  -------         PROC          _NIXIE_SCAN
+  D:0007H         SYMBOL        Location
+  D:0004H         SYMBOL        Number
+  C:05F6H         LINE#         13
+  C:05F6H         LINE#         14
+  C:05F6H         LINE#         15
+  C:05F9H         LINE#         16
+  C:0626H         LINE#         17
+  C:0626H         LINE#         18
+  C:0626H         LINE#         19
+  C:0628H         LINE#         20
+  C:062AH         LINE#         21
+  C:062AH         LINE#         22
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/15/2024  23:13:16  PAGE 7
+
+
+  C:062CH         LINE#         23
+  C:062EH         LINE#         24
+  C:062EH         LINE#         25
+  C:0630H         LINE#         26
+  C:0632H         LINE#         27
+  C:0632H         LINE#         28
+  C:0634H         LINE#         29
+  C:0636H         LINE#         30
+  C:0636H         LINE#         31
+  C:063CH         LINE#         32
+  C:063EH         LINE#         33
+  C:063EH         LINE#         34
+  C:0644H         LINE#         35
+  C:0646H         LINE#         36
+  C:0646H         LINE#         37
+  C:064CH         LINE#         38
+  C:064EH         LINE#         39
+  C:064EH         LINE#         40
+  C:0654H         LINE#         41
+  C:0654H         LINE#         42
+  C:0654H         LINE#         43
+  C:065BH         LINE#         46
+  -------         ENDPROC       _NIXIE_SCAN
+  -------         PROC          NIXIE_LOOP
+  -------         DO            
+  D:0020H         SYMBOL        i
+  -------         ENDDO         
+  C:076DH         LINE#         48
+  C:076DH         LINE#         49
+  C:076DH         LINE#         52
+  C:077BH         LINE#         53
+  C:077DH         LINE#         54
+  C:0784H         LINE#         55
+  C:0784H         LINE#         56
+  C:0787H         LINE#         57
+  C:0787H         LINE#         58
+  -------         ENDPROC       NIXIE_LOOP
+  -------         ENDMOD        NIXIE
+
+  -------         MODULE        DELAY1MS
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:079CH         PUBLIC        _Delay1ms
+  C:0026H         PUBLIC        Delay100us
+  -------         PROC          _DELAY1MS
+  D:0006H         SYMBOL        xms
+  -------         DO            
+  D:0005H         SYMBOL        i
+  D:0004H         SYMBOL        j
+  -------         ENDDO         
+  C:079CH         LINE#         1
+  C:079CH         LINE#         2
+  C:079CH         LINE#         4
+  C:07A0H         LINE#         5
+  C:07A0H         LINE#         6
+  C:07A2H         LINE#         7
+  C:07A4H         LINE#         9
+  C:07A4H         LINE#         10
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/15/2024  23:13:16  PAGE 8
+
+
+  C:07A6H         LINE#         11
+  C:07A8H         LINE#         13
+  C:07ADH         LINE#         14
+  C:07AFH         LINE#         16
+  -------         ENDPROC       _DELAY1MS
+  -------         PROC          DELAY100US
+  -------         DO            
+  D:0007H         SYMBOL        i
+  -------         ENDDO         
+  C:0026H         LINE#         17
+  C:0026H         LINE#         18
+  C:0026H         LINE#         21
+  C:0028H         LINE#         22
+  C:002AH         LINE#         23
+  -------         ENDPROC       DELAY100US
+  -------         ENDMOD        DELAY1MS
+
+  -------         MODULE        ?C?FPADD
+  C:0035H         PUBLIC        ?C?FPADD
+  C:0031H         PUBLIC        ?C?FPSUB
+  -------         ENDMOD        ?C?FPADD
+
+  -------         MODULE        ?C?FPMUL
+  C:0126H         PUBLIC        ?C?FPMUL
+  -------         ENDMOD        ?C?FPMUL
+
+  -------         MODULE        ?C?FPCMP
+  C:022EH         PUBLIC        ?C?FPCMP
+  C:022CH         PUBLIC        ?C?FPCMP3
+  -------         ENDMOD        ?C?FPCMP
+
+  -------         MODULE        ?C?FCAST
+  C:02AFH         PUBLIC        ?C?FCASTC
+  C:02AAH         PUBLIC        ?C?FCASTI
+  C:02A5H         PUBLIC        ?C?FCASTL
+  -------         ENDMOD        ?C?FCAST
+
+  -------         MODULE        ?C?CLDOPTR
+  C:032DH         PUBLIC        ?C?CLDOPTR
+  -------         ENDMOD        ?C?CLDOPTR
+
+  -------         MODULE        ?C?IMUL
+  C:035AH         PUBLIC        ?C?IMUL
+  -------         ENDMOD        ?C?IMUL
+
+  -------         MODULE        ?C?UIDIV
+  C:036CH         PUBLIC        ?C?UIDIV
+  -------         ENDMOD        ?C?UIDIV
+
+  -------         MODULE        ?C?LNEG
+  C:03C1H         PUBLIC        ?C?LNEG
+  -------         ENDMOD        ?C?LNEG
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_UART_SENDSTRING?UART
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/15/2024  23:13:16  PAGE 9
+
+
+    SEGMENT: ?PR?_NIXIE_SETBUF?NIXIE
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?NIXIE_LOOP?NIXIE
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY1MS?DELAY1MS
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?DELAY100US?DELAY1MS
+
+Program Size: data=78.0 xdata=0 code=2003
+LINK/LOCATE RUN COMPLETE.  5 WARNING(S),  0 ERROR(S)
