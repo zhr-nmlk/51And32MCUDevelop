@@ -1,4 +1,4 @@
-# 51AndMCUDevelop
+# 51And32MCUDevelop
 # 记录在校期间制作的51单片机工程及STM32单片机工程
 # 基于STC89C52RC
 ## 目前已完成两个项目，一个项目完善中
